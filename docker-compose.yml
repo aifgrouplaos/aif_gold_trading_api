@@ -1,0 +1,56 @@
+version: '3.7'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gold-trading-service
+    container_name: gold-trading-service
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=gold-trading-db
+      - DB_USERNAME=admin
+      - DB_PASSWORD=password
+    ports:
+      - "8888:80"
+
+    networks:
+      - app-network
+
+  db:
+    image: mysql:8.0
+    container_name: gold-trading-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=gold-trading-db
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=password
+
+    volumes:
+      - .docker/mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: gold-trading-phpmyadmin
+    restart: unless-stopped
+    environment:
+      - PMA_HOST=db
+      - PMA_USER=admin
+      - PMA_PASSWORD=password
+    ports:
+      - "8889:80"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
